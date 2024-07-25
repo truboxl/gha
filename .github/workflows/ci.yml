@@ -1,0 +1,67 @@
+name: ci
+
+on:
+  pull_request:
+
+permissions: {}
+
+jobs:
+  build:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v4
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y libasound2-dev libpulse-dev libgtk-3-dev libpango1.0-dev libx11-xcb-dev nasm
+    - name: Install Rust
+      run: |
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o rustup.sh
+        sh rustup.sh -y --default-toolchain 1.83.0
+    - name: Install cbindgen
+      run: |
+        cargo install cbindgen
+    - name: Download Thunderbird
+      run: |
+        curl -LOC - https://archive.mozilla.org/pub/thunderbird/releases/128.6.0esr/source/thunderbird-128.6.0esr.source.tar.xz
+        mkdir -p thunderbird
+        tar -xf thunderbird-128.6.0esr.source.tar.xz --strip-components=1 -C thunderbird
+    - name: mozconfig
+      run: |
+        cat <<- EOL > thunderbird/.mozconfig
+        ac_add_options --enable-application=comm/mail
+        ac_add_options --disable-official-branding
+
+        # Features
+        ac_add_options --enable-audio-backends=pulseaudio
+        ac_add_options --enable-minify=properties
+        ac_add_options --enable-mobile-optimize
+        ac_add_options --enable-printing
+        ac_add_options --disable-jemalloc
+        ac_add_options --without-wasm-sandboxed-libraries
+        ac_add_options --disable-crashreporter
+        ac_add_options --disable-updater
+        ac_add_options --disable-sandbox
+        ac_add_options --disable-tests
+        ac_add_options --disable-accessibility
+        ac_add_options --disable-crashreporter
+        ac_add_options --disable-dbus
+        ac_add_options --disable-necko-wifi
+        ac_add_options --disable-updater
+        ac_add_options --disable-hardening
+        ac_add_options --disable-parental-controls
+        ac_add_options --disable-webspeech
+        ac_add_options --disable-synth-speechd
+        ac_add_options --disable-elf-hack
+        ac_add_options --disable-address-sanitizer-reporter
+
+        # System addons
+        ac_add_options --allow-addon-sideload
+        EOL
+    - name: Build Thunderbird
+      run: |
+        cd thunderbird
+        ./mach build
