@@ -20,5 +20,5 @@ jobs:
     - name: Run BOINC
       run: |
         uptime
-        timeout --preserve-status 5m boinc --dir /tmp
+        timeout --preserve-status 5m boinc --dir .
         uptime
