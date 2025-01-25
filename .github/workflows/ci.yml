@@ -19,6 +19,7 @@ jobs:
         sudo apt install -y boinc
     - name: Run BOINC
       run: |
+        sudo netstat -tulpn
         uptime
         timeout --preserve-status 5m boinc --dir .
         uptime
