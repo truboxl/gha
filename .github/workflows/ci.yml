@@ -17,7 +17,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt install -y boinc
-        sudo systemctl stop boinc
+        sudo systemctl stop boinc-client
     - name: Run BOINC
       run: |
         sudo netstat -tulpn
