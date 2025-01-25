@@ -1,0 +1,26 @@
+name: ci
+
+on:
+  pull_request:
+
+permissions: {}
+
+jobs:
+  compute:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v4
+    - name: Install BOINC
+      run: |
+        sudo apt-get update
+        sudo apt install -y boinc
+        sudo systemctl stop boinc-client
+    - name: Run BOINC
+      run: |
+        sudo netstat -tulpn
+        uptime
+        timeout --preserve-status 5m boinc --dir . --gui_rpc_port 31417
+        uptime
